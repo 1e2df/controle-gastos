@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gastos">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icone-180.png">
+  <title>Controle de gastos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-tela="resumo">
+  <header class="topo">
+    <h1>Controle de gastos</h1>
+    <nav class="mes-nav" aria-label="Mês exibido">
+      <button type="button" id="mes-anterior" aria-label="Mês anterior">‹</button>
+      <input type="month" id="mes" aria-label="Mês">
+      <button type="button" id="mes-seguinte" aria-label="Mês seguinte">›</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="cartoes" data-tela="resumo" aria-label="Resumo do mês">
+      <div class="cartao"><span class="rotulo"><i class="ponto receita"></i>Receitas</span><strong id="total-receitas">–</strong></div>
+      <div class="cartao"><span class="rotulo"><i class="ponto despesa"></i>Despesas</span><strong id="total-despesas">–</strong></div>
+      <div class="cartao"><span class="rotulo">Saldo do mês</span><strong id="total-saldo">–</strong><small id="saldo-nota"></small></div>
+    </section>
+
+    <div class="grade">
+      <div class="fundo" id="fundo-folha"></div>
+      <section class="painel folha" id="folha" aria-labelledby="form-titulo">
+        <button type="button" class="fechar" id="folha-fechar" aria-label="Fechar">×</button>
+        <h2 id="form-titulo">Novo lançamento</h2>
+        <form id="form-transacao" novalidate>
+          <div class="segmento" role="radiogroup" aria-label="Tipo">
+            <label><input type="radio" name="tipo" value="despesa" checked><span>Despesa</span></label>
+            <label><input type="radio" name="tipo" value="receita"><span>Receita</span></label>
+          </div>
+          <label>Descrição
+            <input type="text" name="descricao" maxlength="120" required autocomplete="off" placeholder="Ex.: Supermercado">
+          </label>
+          <div class="linha">
+            <label>Valor (R$)
+              <input type="text" name="valor" inputmode="decimal" required autocomplete="off" placeholder="0,00">
+            </label>
+            <label>Data
+              <input type="date" name="data" required>
+            </label>
+          </div>
+          <label>Categoria
+            <select name="categoria_id" required></select>
+          </label>
+          <p class="erro" id="form-erro" role="alert" hidden></p>
+          <div class="acoes">
+            <button type="submit" class="primario" id="form-salvar">Adicionar</button>
+            <button type="button" id="form-cancelar" hidden>Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="painel" data-tela="resumo">
+        <h2>Despesas por categoria</h2>
+        <div class="grafico" id="caixa-categorias"><canvas id="grafico-categorias"></canvas></div>
+        <p class="vazio" id="vazio-categorias" hidden>Nenhuma despesa neste mês.</p>
+      </section>
+
+      <section class="painel largo" data-tela="resumo">
+        <h2>Receitas e despesas em <span id="ano-titulo"></span></h2>
+        <div class="grafico anual"><canvas id="grafico-anual"></canvas></div>
+      </section>
+
+      <section class="painel largo" data-tela="lancamentos">
+        <h2>Lançamentos do mês</h2>
+        <div class="tabela-rolagem">
+          <table id="tabela">
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="num">Valor</th><th aria-label="Ações"></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="vazio" id="vazio-tabela" hidden>Nenhum lançamento neste mês.</p>
+      </section>
+
+      <section class="painel largo" data-tela="categorias">
+        <h2>Categorias</h2>
+        <div class="cats">
+          <div><h3>Despesas</h3><ul id="cats-despesa" class="chips"></ul></div>
+          <div><h3>Receitas</h3><ul id="cats-receita" class="chips"></ul></div>
+        </div>
+        <form id="form-categoria" class="linha-cat">
+          <input type="text" name="nome" maxlength="40" required autocomplete="off" placeholder="Nova categoria" aria-label="Nome da nova categoria">
+          <select name="tipo" aria-label="Tipo da categoria">
+            <option value="despesa">Despesa</option>
+            <option value="receita">Receita</option>
+          </select>
+          <button type="submit">Criar</button>
+        </form>
+        <p class="erro" id="cat-erro" role="alert" hidden></p>
+      </section>
+
+      <section class="painel" data-tela="categorias">
+        <h2>Backup dos dados</h2>
+        <p class="nota">Seus lançamentos ficam guardados só neste aparelho. Exporte um arquivo para ter uma cópia de segurança ou para levar os dados a outro aparelho.</p>
+        <div class="acoes">
+          <button type="button" id="exportar">Exportar arquivo</button>
+          <button type="button" id="importar">Importar arquivo</button>
+          <input type="file" id="arquivo-importar" accept="application/json,.json" hidden>
+        </div>
+        <p class="nota" id="backup-msg" role="status" hidden></p>
+      </section>
+
+      <section class="painel" data-tela="categorias">
+        <h2>Aplicativo</h2>
+        <p class="nota" id="instalar-texto"></p>
+        <button type="button" class="primario" id="instalar" hidden>Instalar aplicativo</button>
+      </section>
+    </div>
+  </main>
+
+  <!-- Navegação de aplicativo: só aparece em telas de celular. -->
+  <button type="button" class="mais" id="novo" aria-label="Novo lançamento">+</button>
+  <nav class="abas" aria-label="Seções">
+    <button type="button" data-ir="resumo" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span>Resumo</span>
+    </button>
+    <button type="button" data-ir="lancamentos">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Lançamentos</span>
+    </button>
+    <button type="button" data-ir="categorias">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 5v4M6 15v4"/></svg><span>Ajustes</span>
+    </button>
+  </nav>
+
+  <script src="vendor/chart.js"></script>
+  <script src="dados.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

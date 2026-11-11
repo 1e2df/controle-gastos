@@ -1,0 +1,13 @@
+{
+  "name": "controle-gastos",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Controle de gastos pessoais: aplicativo instalável que funciona offline",
+  "scripts": {
+    "start": "node server.js",
+    "rede": "node server.js --rede"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
