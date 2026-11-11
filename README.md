@@ -2,7 +2,7 @@
 
 Aplicativo de controle de gastos pessoais: cadastro de receitas e despesas, categorias e gráficos mensais. Instala pelo navegador e funciona sem internet.
 
-**Abrir e instalar:** https://hendryck11st.github.io/controle-gastos/
+**Abrir e instalar:** https://1e2df.github.io/controle-gastos/
 
 ## Como instalar
 
